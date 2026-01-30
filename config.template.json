@@ -1,0 +1,26 @@
+{
+  "authMode": "password",
+  "password": "${MOLTBOT_PASSWORD}",
+  "dmPolicy": "allowlist",
+  "channelPolicy": "allowlist",
+  "allowedUsers": [],
+  "allowedChannels": [],
+  "allowedDMs": [],
+  "logLevel": "info",
+  "maxConcurrentChats": 5,
+  "rateLimiting": {
+    "enabled": true,
+    "maxRequestsPerMinute": 10,
+    "maxRequestsPerHour": 100
+  },
+  "security": {
+    "enableCORS": false,
+    "trustedProxies": ["127.0.0.1"],
+    "maxRequestSize": "10mb"
+  },
+  "features": {
+    "enableFileUploads": false,
+    "enableWebSearch": false,
+    "enableCodeExecution": false
+  }
+}

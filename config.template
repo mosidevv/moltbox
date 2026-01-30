@@ -1,0 +1,94 @@
+# Moltbot/Clawdbot Configuration Template
+# This file will be copied to config.yml during installation
+# DO NOT commit secrets to version control
+
+# Authentication Configuration
+auth:
+  mode: password
+  # Password will be replaced from BOT_PASSWORD environment variable
+  password: PASSWORD_PLACEHOLDER
+
+# Gateway Configuration
+gateway:
+  # Bind to loopback only - no public exposure
+  bind: 127.0.0.1:8080
+  # Only accessible via Tailscale network
+  tailnet_only: true
+  # Disable public access
+  public: false
+
+# Channel Configuration
+channels:
+  # Allowlist mode - only specified channels are allowed
+  mode: allowlist
+  allowed:
+    # Add your channel IDs here
+    # - "channel-id-1"
+    # - "channel-id-2"
+    # - "channel-id-3"
+
+# Direct Message Policy
+dm_policy:
+  # Restrict DM access - not open to everyone
+  mode: pairing
+  # Only allow DMs from paired users
+  allow_unpaired: false
+  # Require explicit pairing
+  require_pairing: true
+
+# Logging Configuration
+logging:
+  level: info
+  file: /app/logs/moltbot.log
+  max_size: 10485760  # 10MB
+  max_backups: 3
+  max_age: 7  # days
+  compress: true
+
+# Security Settings
+security:
+  # Enable rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+  # Enable request validation
+  validate_requests: true
+  # Disable debug mode in production
+  debug: false
+  # Enable HTTPS only
+  https_only: true
+
+# Bot Behavior
+bot:
+  # Bot name
+  name: Moltbot
+  # Response timeout
+  timeout: 30
+  # Max message length
+  max_message_length: 4000
+  # Enable command prefix
+  command_prefix: "/"
+
+# Network Configuration
+network:
+  # Use internal Docker network
+  internal: true
+  # No external connectivity required
+  external: false
+  # DNS servers (optional)
+  dns:
+    - 1.1.1.1
+    - 8.8.8.8
+
+# Health Check
+health:
+  enabled: true
+  interval: 30
+  timeout: 5
+  retries: 3
+
+# Metrics (optional)
+metrics:
+  enabled: false
+  # Only expose on loopback if enabled
+  bind: 127.0.0.1:9090
