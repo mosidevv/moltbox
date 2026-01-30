@@ -1,0 +1,50 @@
+================================================================================
+                    DOCKER BUILD FIX - SUMMARY
+================================================================================
+
+ERROR FIXED:
+  "ERROR: Head 'https://ghcr.io/v2/anthropics/moltbot/manifests/latest': denied"
+
+ROOT CAUSE:
+  Moltbot does not publish pre-built Docker images to any registry.
+  Official installation requires building from source.
+
+FILES MODIFIED:
+  ✓ install_and_harden.sh  - Added git, clone repo, build image
+  ✓ docker-compose.yml     - Changed to moltbot:local
+  ✓ README.md              - Added build notes
+  ✓ DEPLOYMENT_SUMMARY.md  - Added prerequisites
+
+NEW FILES CREATED:
+  ✓ DOCKER_BUILD_FIX.md    - Detailed fix documentation
+  ✓ QUICK_FIX_SUMMARY.md   - Quick reference guide
+  ✓ CHANGELOG.md           - Version history
+  ✓ TEST_FIX.md            - Testing procedures
+  ✓ FIX_SUMMARY.txt        - This summary
+
+KEY CHANGES:
+  1. Added 'git' to required packages
+  2. Step 14 now clones https://github.com/moltbot/moltbot.git
+  3. Step 14 builds Docker image: docker build -t moltbot:local
+  4. docker-compose.yml uses moltbot:local instead of ghcr.io image
+  5. Removed docker-compose pull from systemd service
+
+INSTALLATION NOW:
+  - Clones Moltbot repo to /opt/moltbot/moltbot-repo
+  - Builds Docker image locally as moltbot:local
+  - Takes 5-10 minutes (includes build time)
+  - Requires 2GB RAM, 10GB disk space
+
+VERIFICATION:
+  docker images | grep moltbot
+  # Should show: moltbot  local  ...
+
+UPDATING:
+  cd /opt/moltbot/moltbot-repo
+  sudo -u moltbot git pull
+  sudo -u moltbot docker build -t moltbot:local -f Dockerfile .
+  sudo systemctl restart moltbot
+
+STATUS: ✅ Fix complete and ready for deployment
+
+================================================================================
