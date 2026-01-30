@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  moltbot:
+    image: moltbot/moltbot:latest  # Replace with actual image
+    container_name: moltbot
+    restart: unless-stopped
+    user: "${BOT_USER:-1000}:1000"
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+      - /var/log/moltbot:/app/logs
+    environment:
+      - BOT_CONFIG=/app/config.yml
+    networks:
+      - moltbot_network
+    # Bind to loopback only - no public exposure
+    ports: []
+    # Gateway binds to loopback or Tailnet only
+    command: ["--bind", "127.0.0.1:8080", "--tailnet-only"]
+    depends_on:
+      - clawdbot
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  clawdbot:
+    image: moltbot/clawdbot:latest  # Replace with actual image
+    container_name: clawdbot
+    restart: unless-stopped
+    user: "${BOT_USER:-1000}:1000"
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+      - /var/log/moltbot:/app/logs
+      - clawdbot_data:/app/data
+    environment:
+      - BOT_CONFIG=/app/config.yml
+    networks:
+      - moltbot_network
+    # No public ports - internal communication only
+    ports: []
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  moltbot_network:
+    driver: bridge
+    internal: true  # No external access
+
+volumes:
+  clawdbot_data:
+    driver: local
