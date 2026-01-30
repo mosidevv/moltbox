@@ -95,6 +95,7 @@ REQUIRED_PACKAGES=(
     "apt-listchanges"
     "logrotate"
     "curl"
+    "git"
     "gnupg"
     "ca-certificates"
 )
@@ -324,7 +325,7 @@ version: '3.8'
 
 services:
   moltbot:
-    image: ghcr.io/anthropics/moltbot:latest
+    image: moltbot:local
     container_name: moltbot
     restart: unless-stopped
     user: "$(id -u $MOLTBOT_USER):$(id -g $MOLTBOT_USER)"
@@ -400,7 +401,6 @@ WorkingDirectory=$INSTALL_DIR
 User=$MOLTBOT_USER
 Group=$MOLTBOT_USER
 
-ExecStartPre=/usr/bin/docker-compose -f $INSTALL_DIR/docker-compose.yml pull
 ExecStart=/usr/bin/docker-compose -f $INSTALL_DIR/docker-compose.yml up -d
 ExecStop=/usr/bin/docker-compose -f $INSTALL_DIR/docker-compose.yml down
 
@@ -618,25 +618,54 @@ chown "$MOLTBOT_USER:$MOLTBOT_USER" "$INSTALL_DIR/moltbot-doctor.sh"
 log_info "Helper scripts created"
 
 #############################################################################
-# 14. Start Moltbot Service
+# 14. Clone Moltbot Repository and Build Docker Image
 #############################################################################
-log_info "Step 14: Starting Moltbot service..."
+log_info "Step 14: Cloning Moltbot repository and building Docker image..."
 
-# Pull latest image
-cd "$INSTALL_DIR"
-sudo -u "$MOLTBOT_USER" docker-compose pull
+MOLTBOT_REPO_DIR="$INSTALL_DIR/moltbot-repo"
+
+# Clone repository if not already present
+if [[ ! -d "$MOLTBOT_REPO_DIR" ]]; then
+    log_info "Cloning Moltbot repository from GitHub..."
+    sudo -u "$MOLTBOT_USER" git clone https://github.com/moltbot/moltbot.git "$MOLTBOT_REPO_DIR"
+    log_info "Repository cloned successfully"
+else
+    log_info "Repository already exists, pulling latest changes..."
+    cd "$MOLTBOT_REPO_DIR"
+    sudo -u "$MOLTBOT_USER" git pull origin main || sudo -u "$MOLTBOT_USER" git pull origin master || true
+fi
+
+# Build Docker image from source
+cd "$MOLTBOT_REPO_DIR"
+log_info "Building Moltbot Docker image (this may take several minutes)..."
+
+if [[ -f "Dockerfile" ]]; then
+    sudo -u "$MOLTBOT_USER" docker build -t moltbot:local -f Dockerfile .
+    log_info "Moltbot Docker image built successfully"
+else
+    log_error "Dockerfile not found in repository"
+    exit 1
+fi
+
+# Build sandbox images if needed
+if [[ -f "scripts/sandbox-setup.sh" ]]; then
+    log_info "Building sandbox images..."
+    sudo -u "$MOLTBOT_USER" bash scripts/sandbox-setup.sh || log_warn "Sandbox setup script failed, continuing..."
+fi
 
 # Start service
+cd "$INSTALL_DIR"
 systemctl start moltbot.service
 
 # Wait for service to be ready
-sleep 5
+sleep 10
 
 if systemctl is-active --quiet moltbot; then
     log_info "Moltbot service started successfully"
 else
     log_error "Failed to start Moltbot service"
     systemctl status moltbot.service
+    docker-compose -f "$INSTALL_DIR/docker-compose.yml" logs --tail=50
     exit 1
 fi
 

@@ -52,6 +52,10 @@ This package contains everything needed to securely install and manage Moltbot/C
 - Fresh Ubuntu 22.04 VPS
 - Root or sudo access
 - Strong password for bot authentication
+- At least 2GB RAM and 10GB disk space (for building Docker image)
+- Internet connection (to clone Moltbot repository)
+
+**Important**: Moltbot does not publish pre-built Docker images. The installation script will clone the official Moltbot repository from GitHub and build the Docker image locally from source. Initial build takes 5-10 minutes.
 
 ### One-Line Installation
 

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   moltbot:
-    image: ghcr.io/anthropics/moltbot:latest
+    image: moltbot:local
     container_name: moltbot
     restart: unless-stopped
     

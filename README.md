@@ -22,6 +22,10 @@ This repository contains a secure, hardened installation script for Moltbot/Claw
 - Root or sudo access
 - Tailscale account (optional but recommended)
 - Strong password (minimum 16 characters)
+- At least 2GB RAM and 10GB disk space (for building Docker image)
+- Internet connection (to clone Moltbot repository from GitHub)
+
+**Note:** Moltbot does not publish pre-built Docker images. The installation script will clone the official Moltbot repository from GitHub and build the Docker image locally from source. The initial build may take 5-10 minutes depending on your server's resources.
 
 ## 🚀 Quick Start (One-Line Install)
 
@@ -207,8 +211,12 @@ docker-compose -f /opt/moltbot/docker-compose.yml logs -f
 # Restart container
 docker-compose -f /opt/moltbot/docker-compose.yml restart
 
-# Pull latest image
-docker-compose -f /opt/moltbot/docker-compose.yml pull
+# Update to latest version (rebuild from source)
+cd /opt/moltbot/moltbot-repo
+sudo -u moltbot git pull
+sudo -u moltbot docker build -t moltbot:local -f Dockerfile .
+cd /opt/moltbot
+docker-compose up -d --force-recreate
 
 # Rebuild and restart
 docker-compose -f /opt/moltbot/docker-compose.yml up -d --force-recreate
